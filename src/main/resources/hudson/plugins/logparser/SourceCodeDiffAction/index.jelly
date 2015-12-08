@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <l:layout>
+  	<st:bind var="action" value="${it}"/>
+  	<st:bind var="name" value="${it.fileName}"/>
+    <st:include it="${it.owner}" page="sidepanel.jelly"/>
+    <l:main-panel>
+      <script type="text/javascript" src="${resURL}/plugin/log-parser/js/jquery-1.11.1.min.js"></script>
+      <script>jQuery.noConflict();</script>
+      Switch to Another Type of Diff
+      <br/>
+      <br/>
+      <a href="" class="button" id="consoleLineDiffLink" onclick="return retrieveUrl();">Console Output (By Line)</a>
+      <br/>
+      <a href="" class="button" id="sectionDiffLink" onclick="return retrieveUrl();">Console Output (By Section)</a>
+      <br/>
+      <a href="" class="button" id="sourceCodeDiffLink" onclick="return retrieveUrl();">Source Code</a>
+      <br/>
+      <br/>
+      <button id="downloadHTML">Download Report</button>
+	  <f:entry>
+	  	  ${it.html}
+	  </f:entry>
+	  <script>
+        jQuery(function ($) {
+		    $("#downloadHTML").click(function () {
+             var name;
+             action.exportFileName(function(t) {
+                 name = t.responseObject();
+             })
+             action.exportHtml(function(t) {
+             download(String(name), t.responseObject());
+         })
+        });
+        });
+
+        function download(filename, string){
+            var link = document.createElement('a');
+            link.style.display = 'none';
+            link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(string));
+            link.setAttribute('download', filename);
+            link.setAttribute('id', 'downloadlink');
+            document.body.appendChild(link);
+            link.click();
+        }
+        
+        function retrieveUrl(){
+            var anotherBuildNum;
+            var currentUrl = window.location.href;
+            anotherBuildNum = currentUrl.substring(currentUrl.indexOf("prevBuild")+10);
+            document.getElementById("consoleLineDiffLink").href = currentUrl.substring(0, currentUrl.indexOf("diffbuild")+10) + 
+            														"consoleLineDiffDisplay" + "/?prevBuild=" + anotherBuildNum;
+            document.getElementById("sectionDiffLink").href = currentUrl.substring(0, currentUrl.indexOf("diffbuild")+10) + 
+            														"logSectionDiffAction" + "/?prevBuild=" + anotherBuildNum;
+            document.getElementById("sourceCodeDiffLink").href = currentUrl.substring(0, currentUrl.indexOf("diffbuild")+10) + 
+            														"sourceCodeDiffAction" + "/?prevBuild=" + anotherBuildNum;
+            return true;
+        }
+	  </script>
+    </l:main-panel>
+  </l:layout>
+</j:jelly>
